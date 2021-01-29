@@ -3,12 +3,3 @@
 .winenv
 
 __pycache__
-
-*.key
-*.crt
-*.ca
-*.p12
-*.pub
-
-cert_scripts/new_certs
-*.jar

@@ -65,9 +65,13 @@ Also remember to set the same password to Arrowhead core properties in `./core_s
 
 
 #### Run certificate generation script
-Create the certificates for both Arrowhead core systems and clients by running the script:
+Create the certificates for both Arrowhead core systems and clients by running the script found in directory:
 ```
-./certs/scripts/create_p12_certs.sh
+cd ./certs/scripts
+```
+From there run command:
+```
+./create_p12_certs.sh
 ```
 The script generates the certificates into a PKCS #12 (.p12) store within `./certs` folder. Incase the certificate already existed, it is not overwritten by the script.
 
