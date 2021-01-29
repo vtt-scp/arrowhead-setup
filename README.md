@@ -8,6 +8,7 @@ This project is derived and expanded from scripts and docker-compose found in [A
 ## Table of Contents <!-- omit in toc -->
 - [Running Arrowhead core systems with Docker](#running-arrowhead-core-systems-with-docker)
   - [Requirements](#requirements)
+  - [Quick guide](#quick-guide)
   - [Create certificates](#create-certificates)
     - [Insert your information](#insert-your-information)
     - [PKCS #12 password](#pkcs-12-password)
@@ -36,6 +37,36 @@ Requires Docker, which can be installed for Ubuntu or Raspberry Pi following the
 For windows you need to download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
 
 You also need to separately install docker-compose on Linux systems to which instructions can be found [here](https://docs.docker.com/compose/install/)
+
+
+### Quick guide
+Generate default certificates (may need to run `dos2unix` / `unix2dos` on the script):
+```
+cd certs/scripts
+./create_p12_certs.sh
+```
+Create volume for database:
+```
+docker volume create --name=mysql
+```
+Start Arrowhead core systems (from repository root folder):
+```
+docker-compose up --build
+```
+Use `sysop` or `client` certificates found in `./certs` to access Arrowhead core systems.
+
+
+Instructions on how to import the `sysop.p12` certificate to your browser can be found [here](https://www.ibm.com/support/knowledgecenter/SSYMRC_6.0.2/com.ibm.team.jp.jrs.doc/topics/t_jrs_brwsr_cert_cfg.html).  
+Default pasword for the `.p12` file is `123456`.
+
+With browser you may now access Arrowhead core Swaggers from:
+```
+https://localhost:8443  # Service registry
+https://localhost:8445  # Authorization
+https://localhost:8441  # Orchestrator
+https://localhost:8449  # Gatekeeper
+https://localhost:8453  # Gateway
+```
 
 
 ### Create certificates
