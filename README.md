@@ -55,6 +55,9 @@ Edit the script `./certs/scripts/create_p12_certs.sh` with your information to f
 - YOUR CLIENTS
   - Append to the list of `create_consumer_system_keystore` your desired client system names
 
+Also remember to change Arrowhead core properties in `./core_system_config` folder to match:
+- `server.ssl.key-alias`
+
 
 #### PKCS #12 password
 You may set your own password to the P12 files before creating the certificates.  
