@@ -25,6 +25,10 @@ This project is derived and expanded from scripts and docker-compose found in [A
 
 
 ## Running Arrowhead core systems with Docker
+Clone the repository to your machine with:
+```
+git clone https://github.com/VTT-O-M/arrowhead-setup.git
+```
 
 
 ### Requirements
