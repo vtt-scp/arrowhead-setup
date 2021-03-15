@@ -51,8 +51,8 @@ create_consumer_system_keystore() {
 create_consumer_system_keystore "authorization"
 create_consumer_system_keystore "orchestrator"
 create_consumer_system_keystore "service_registry"
-create_consumer_system_keystore "gatekeeper"
-create_consumer_system_keystore "gateway"
+#create_consumer_system_keystore "gatekeeper"
+#create_consumer_system_keystore "gateway"
 #create_consumer_system_keystore "certificate_authority"
 #create_consumer_system_keystore "event_handler"
 

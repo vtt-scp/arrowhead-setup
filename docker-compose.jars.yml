@@ -24,20 +24,20 @@ services:
       args:
         core_system: orchestrator
 
-  gatekeeper:
-    image: gatekeeper:latest
-    build:
-      context: ./
-      args:
-        core_system: gatekeeper
-
-  gateway:
-    image: gateway:latest
-    build:
-      context: ./
-      args:
-        core_system: gateway
-
+#  gatekeeper:
+#    image: gatekeeper:latest
+#    build:
+#      context: ./
+#      args:
+#        core_system: gatekeeper
+#
+#  gateway:
+#    image: gateway:latest
+#    build:
+#      context: ./
+#      args:
+#        core_system: gateway
+#
 #  eventhandler:
 #    image: eventhandler:latest
 #    build:

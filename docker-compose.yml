@@ -56,32 +56,32 @@ services:
     ports:
       - 8441:8441
 
-  gatekeeper:
-    container_name: gatekeeper
-    restart: unless-stopped
-    image: svetlint/gatekeeper:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
-      - ./certs/gatekeeper.p12:/gatekeeper/gatekeeper.p12
-      - ./certs/truststore.p12:/gatekeeper/truststore.p12
-    ports:
-      - 8449:8449
-
-  gateway:
-    container_name: gateway
-    restart: unless-stopped
-    image: svetlint/gateway:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/gateway.properties:/gateway/application.properties
-      - ./certs/gateway.p12:/gateway/gateway.p12
-      - ./certs/truststore.p12:/gateway/truststore.p12
-    ports:
-      - 8453:8453
-
+#  gatekeeper:
+#    container_name: gatekeeper
+#    restart: unless-stopped
+#    image: svetlint/gatekeeper:latest
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
+#      - ./certs/gatekeeper.p12:/gatekeeper/gatekeeper.p12
+#      - ./certs/truststore.p12:/gatekeeper/truststore.p12
+#    ports:
+#      - 8449:8449
+#
+#  gateway:
+#    container_name: gateway
+#    restart: unless-stopped
+#    image: svetlint/gateway:latest
+#    depends_on:
+#      - mysql
+#    volumes:
+#      - ./core_system_config/gateway.properties:/gateway/application.properties
+#      - ./certs/gateway.p12:/gateway/gateway.p12
+#      - ./certs/truststore.p12:/gateway/truststore.p12
+#    ports:
+#      - 8453:8453
+#
 #  eventhandler:
 #    container_name: eventhandler
 #    restart: unless-stopped
