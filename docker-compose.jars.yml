@@ -38,16 +38,16 @@ services:
       args:
         core_system: gateway
 
-#  eventhandler:
-#    image: eventhandler:latest
-#    build:
-#      context: ./
-#      args:
-#        core_system: eventhandler
-#
-#  certificateauthority:
-#    image: certificateauthority:latest
-#    build:
-#      context: ./
-#      args:
-#        core_system: certificateauthority
+  eventhandler:
+    image: eventhandler:latest
+    build:
+      context: ./
+      args:
+        core_system: eventhandler
+
+  certificateauthority:
+    image: certificateauthority:latest
+    build:
+      context: ./
+      args:
+        core_system: certificateauthority

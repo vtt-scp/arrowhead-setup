@@ -82,31 +82,31 @@ services:
     ports:
       - 8453:8453
 
-#  eventhandler:
-#    container_name: eventhandler
-#    restart: unless-stopped
-#    image: svetlint/eventhandler:latest
-#    depends_on:
-#      - mysql
-#    volumes:
-#      - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
-#      - ./certs/event_handler.p12:/eventhandler/event_handler.p12
-#      - ./certs/truststore.p12:/eventhandler/truststore.p12
-#    ports:
-#      - 8455:8455
-#
-#  certificateauthority:
-#    container_name: certificateauthority
-#    restart: unless-stopped
-#    image: svetlint/certificateauthority:latest
-#    depends_on:
-#      - mysql
-#    volumes:
-#      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
-#      - ./certs/certificate_authority.p12:/certificateauthority/certificate_authority.p12
-#      - ./certs/truststore.p12:/certificateauthority/truststore.p12
-#    ports:
-#      - 8448:8448
+  eventhandler:
+    container_name: eventhandler
+    restart: unless-stopped
+    image: svetlint/eventhandler:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
+      - ./certs/event_handler.p12:/eventhandler/event_handler.p12
+      - ./certs/truststore.p12:/eventhandler/truststore.p12
+    ports:
+      - 8455:8455
+
+  certificateauthority:
+    container_name: certificateauthority
+    restart: unless-stopped
+    image: svetlint/certificateauthority:latest
+    depends_on:
+      - mysql
+    volumes:
+      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
+      - ./certs/certificate_authority.p12:/certificateauthority/certificate_authority.p12
+      - ./certs/truststore.p12:/certificateauthority/truststore.p12
+    ports:
+      - 8448:8448
 
 volumes:
   mysql:
