@@ -1,7 +1,0 @@
-# Requirements for running unpack_p12.py
-pyOpenSSL==20.0.1
-
-# Requirements for developing unpack_p12.py
-black==20.8b1
-pycodestyle==2.6.0
-pylint==2.6.0

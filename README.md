@@ -18,10 +18,11 @@ This project is derived and expanded from scripts and docker-compose found in [A
     - [...with docker images from jars](#with-docker-images-from-jars)
     - [...with lower memory usage (and less performance)](#with-lower-memory-usage-and-less-performance)
     - [...with management tool](#with-management-tool)
+    - [...with jars and low memory](#with-jars-and-low-memory)
     - [...with all above options](#with-all-above-options)
   - [Shut down Arrowhead core systems](#shut-down-arrowhead-core-systems)
 - [P12 certificate unpacking for clients](#p12-certificate-unpacking-for-clients)
-  - [Python script unpack_p12.py](#python-script-unpack_p12py)
+  - [Shell script unpack_p12.sh](#shell-script-unpack_p12sh)
   - [Command line openssl unpack](#command-line-openssl-unpack)
 
 
@@ -165,6 +166,14 @@ docker-compose \
 up --build
 ```
 
+#### ...with jars and low memory
+```
+docker-compose \
+-f docker-compose.yml \
+-f docker-compose.jars.yml \
+-f docker-compose.low_mem.yml \
+up --build
+```
 
 #### ...with all above options
 ```
@@ -187,23 +196,21 @@ docker-compose down
 
 ## P12 certificate unpacking for clients
 
-### Python script unpack_p12.py
+### Shell script unpack_p12.sh
 
-Requires Python>3.7 and pyOpenSSL.
-```
-pip install pyOpenSSL
-```
+Utilizes openssl.  
+(May need to run `dos2unix` / `unix2dos` on the script)
 
 Using via command line:
 ```
-        script:                     path to file:         passphrase:
-python3 certs/scripts/unpack_p12.py certs/your_client.p12 123456
+script:                       path to p12 file:       passphrase:
+./certs/scripts/unpack_p12.sh ./certs/your_client.p12 123456
 ```
 Output:
 ```
-Created file: certs/your_client.crt
-Created file: certs/your_client.key
-Created file: certs/your_client.ca
+Created file: ./certs/your_client.crt
+Created file: ./certs/your_client.key
+Created file: ./certs/your_client.ca
 ```
 
 

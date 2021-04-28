@@ -3,3 +3,4 @@
 .winenv
 
 __pycache__
+release-*.zip
