@@ -3,7 +3,7 @@
 # Created by Jani Hietala (https://github.com/scurvide)
 
 # Unpacks a PKCS#12 file into .crt, .key and .ca files
-# Usage: ./unpack_p12 input_p12_filepath passphrase
+# Usage: ./unpack_p12.sh input_p12_filepath passphrase
 
 filename=${1//.p12/}
 

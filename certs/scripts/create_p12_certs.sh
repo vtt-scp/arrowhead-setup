@@ -13,6 +13,8 @@ ROOT="arrowhead.eu"
 COMPANY="your_company"
 # Your Arrowhead cloud
 CLOUD="your_cloud"
+# Relay
+RELAY="relay"
 # Append Arrowhead server's dns and/or ip address to COMMON_SAN
 COMMON_SAN="dns:localhost,ip:127.0.0.1"  # ,dns:your_domain,ip:123.456.789.123
 
@@ -32,6 +34,30 @@ create_root_keystore \
 create_cloud_keystore \
   "../master/master.p12" "${ROOT}" \
   "../cloud/${CLOUD}.p12" "${CLOUD}.${COMPANY}.${ROOT}"
+
+
+# RELAY
+
+# Relay certificates for the relay system between Arrowhead local clouds
+create_cloud_keystore \
+  "../master/master.p12" "${ROOT}" \
+  "../relay/${RELAY}.p12" "${RELAY}.${ROOT}"
+
+create_relay_system_keystore() {
+  SYSTEM_NAME=$1
+  SAN="dns:${SYSTEM_NAME//_}"
+
+  create_system_keystore \
+    "../master/master.p12" "${ROOT}" \
+    "../relay/${RELAY}.p12" "${RELAY}.${ROOT}" \
+    "../relay/${SYSTEM_NAME}.p12" "${SYSTEM_NAME}.${RELAY}.${ROOT}" \
+    "${SAN},${COMMON_SAN}"
+}
+create_relay_system_keystore "your_relay"
+
+create_truststore \
+  "../relay/truststore.p12" \
+  "../master/master.crt" "${ROOT}"
 
 
 # ARROWHEAD CORE
@@ -79,3 +105,9 @@ create_sysop_keystore \
 create_truststore \
   "../truststore.p12" \
   "../cloud/${CLOUD}.crt" "${CLOUD}.${COMPANY}.${ROOT}"
+
+# Truststore for gatekeeper and gateway including relay master certificate
+create_truststore \
+  "../gk_gw_truststore.p12" \
+  "../cloud/${CLOUD}.crt" "${CLOUD}.${COMPANY}.${ROOT}" \
+  "../relay/${RELAY}.crt" "${RELAY}.${ROOT}"
