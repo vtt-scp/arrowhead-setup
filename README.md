@@ -83,7 +83,7 @@ Edit the script `./certs/scripts/create_p12_certs.sh` with your information to f
   - Your Arrowhead cloud name
 - COMMON_SAN
   - Append here your dns and/or ip address of Arrowhead core systems host
-  - Append dns and/or ip addresses you plan to decribe your client systems with
+  - Append dns and/or ip addresses for your client systems
 - YOUR CLIENTS
   - Append to the list of `create_consumer_system_keystore` your desired client system names
 
