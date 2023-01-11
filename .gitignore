@@ -1,6 +1,2 @@
-.venv
-.vscode
-.winenv
-
-__pycache__
-release-*.zip
+sql
+certs

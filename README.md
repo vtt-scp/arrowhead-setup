@@ -6,8 +6,14 @@ This project is derived and expanded from scripts and docker-compose found in [A
 
 
 ## Table of Contents <!-- omit in toc -->
+- [Requirements](#requirements)
+- [Setup](#setup)
+  - [Arrowhead services](#arrowhead-services)
+    - [Getting Arrowhead service files](#getting-arrowhead-service-files)
+    - [Service file structure under `services` folder](#service-file-structure-under-services-folder)
+  - [Configuring `application.properties`](#configuring-applicationproperties)
 - [Running Arrowhead core systems with Docker](#running-arrowhead-core-systems-with-docker)
-  - [Requirements](#requirements)
+  - [Requirements](#requirements-1)
   - [Quick guide](#quick-guide)
   - [Create certificates](#create-certificates)
     - [Insert your information](#insert-your-information)
@@ -22,8 +28,38 @@ This project is derived and expanded from scripts and docker-compose found in [A
     - [...with all above options](#with-all-above-options)
   - [Shut down Arrowhead core systems](#shut-down-arrowhead-core-systems)
 - [P12 certificate unpacking for clients](#p12-certificate-unpacking-for-clients)
-  - [Shell script unpack_p12.sh](#shell-script-unpack_p12sh)
+  - [Shell script unpack\_p12.sh](#shell-script-unpack_p12sh)
   - [Command line openssl unpack](#command-line-openssl-unpack)
+
+## Requirements
+
+- Docker
+- Docker Compose
+
+Requires Docker, which can be installed for Ubuntu or Raspberry Pi following the guide [here](https://docs.docker.com/engine/install/ubuntu/).  
+For windows you need to download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
+
+You also need to separately install docker-compose on Linux systems to which instructions can be found [here](https://docs.docker.com/compose/install/)
+
+## Setup
+
+### Arrowhead services
+`services` directory for Arrowhead service files used to launch the services in containers with the `docker-compose.yml`.
+
+#### Getting Arrowhead service files
+- Latest released Arrowhead service files can be found in the [official releases](https://github.com/eclipse-arrowhead/core-java-spring/releases/).
+- Instuctions on how to build `.jar` files for Arrowhead services can be found in the [official](https://github.com/eclipse-arrowhead/core-java-spring) repository.
+
+#### Service file structure under `services` folder
+Each Arrowhead service under `services` folder should include `.jar` and `application.properties` files.  
+For example, `services/arrowhead-serviceregistry-4.6.0/` contains:
+- `application.properties`
+- `arrowhead-serviceregistry-4.6.0.jar`
+- `log4j2.xml`
+
+### Configuring `application.properties`
+
+
 
 
 ## Running Arrowhead core systems with Docker

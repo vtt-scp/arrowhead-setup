@@ -23,10 +23,10 @@ services:
     environment:
       - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m
 
-#  eventhandler:
-#    environment:
-#      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m
-#
-#  certificateauthority:
-#    environment:
-#      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m
+  eventhandler:
+    environment:
+      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m
+
+  certificateauthority:
+    environment:
+      - JVM_FLAGS=-XX:+UseSerialGC -Xmx1G -Xms32m

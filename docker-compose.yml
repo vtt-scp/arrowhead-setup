@@ -3,111 +3,100 @@ version: "3"
 services:
   mysql:
     container_name: mysql
-    restart: unless-stopped
-    image: mariadb:10.4
-    environment:
-      - MYSQL_ROOT_PASSWORD=changethispass
-    volumes:
-      - mysql:/var/lib/mysql
-      - ./mariadb_config/mariadb.cnf:/etc/mysql/my.cnf
-      - ./mariadb_config/mysql.conf.d:/etc/mysql/mysql.conf.d/
-      - ./mariadb_config/sql:/docker-entrypoint-initdb.d/
     ports:
       - 3306:3306
+    restart: unless-stopped
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: changethispass
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./sql/:/docker-entrypoint-initdb.d/
 
   serviceregistry:
     container_name: serviceregistry
-    #restart: unless-stopped
-    image: svetlint/serviceregistry:latest
-    depends_on:
-      - mysql
-    volumes:
-      # dont forget to change the route of the locally available config file
-      # format is <file on your local machine, (change this!!!)>:<file location inside the container (don't change this part!!!)>
-      - ./core_system_config/serviceregistry.properties:/serviceregistry/application.properties
-      - ./certs/service_registry.p12:/serviceregistry/service_registry.p12
-      - ./certs/truststore.p12:/serviceregistry/truststore.p12
     ports:
       - 8443:8443
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-serviceregistry-4.6.0/:/opt/arrowhead/
+      - ./certs/serviceregistry.p12:/opt/arrowhead/certificates/serviceregistry.p12
+      - ./certs/truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-serviceregistry-4.6.0.jar
 
   authorization:
     container_name: authorization
-    #restart: unless-stopped
-    image: svetlint/authorization:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/authorization.properties:/authorization/application.properties
-      - ./certs/authorization.p12:/authorization/authorization.p12
-      - ./certs/truststore.p12:/authorization/truststore.p12
     ports:
       - 8445:8445
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-authorization-4.6.0/:/opt/arrowhead/
+      - ./certs/authorization.p12:/opt/arrowhead/certificates/authorization.p12
+      - ./certs/truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-authorization-4.6.0.jar
 
   orchestrator:
     container_name: orchestrator
-    #restart: unless-stopped
-    image: svetlint/orchestrator:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/orchestrator.properties:/orchestrator/application.properties
-      - ./certs/orchestrator.p12:/orchestrator/orchestrator.p12
-      - ./certs/truststore.p12:/orchestrator/truststore.p12
     ports:
       - 8441:8441
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-orchestrator-4.6.0/:/opt/arrowhead/
+      - ./certs/orchestrator.p12:/opt/arrowhead/certificates/orchestrator.p12
+      - ./certs/truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-orchestrator-4.6.0.jar
+
+  certificateauthority:
+    container_name: certificateauthority
+    ports:
+      - 8448:8448
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-certificate-authority-4.6.0/:/opt/arrowhead/
+      - ./certs/certificateauthority.p12:/opt/arrowhead/certificates/certificateauthority.p12
+      - ./certs/truststore.p12:/opt/arrowhead/certificates/truststore.p12
+      - ./certs/cloud/:/opt/arrowhead/certificates/cloud/
+    command: java -jar arrowhead-certificate-authority-4.6.0.jar
 
   gatekeeper:
     container_name: gatekeeper
-    #restart: unless-stopped
-    image: svetlint/gatekeeper:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/gatekeeper.properties:/gatekeeper/application.properties
-      - ./certs/gatekeeper.p12:/gatekeeper/gatekeeper.p12
-      - ./certs/gk_gw_truststore.p12:/gatekeeper/truststore.p12
     ports:
       - 8449:8449
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-gatekeeper-4.6.0/:/opt/arrowhead/
+      - ./certs/gatekeeper.p12:/opt/arrowhead/certificates/gatekeeper.p12
+      - ./certs/gk_gw_truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-gatekeeper-4.6.0.jar
 
   gateway:
     container_name: gateway
-    #restart: unless-stopped
-    image: svetlint/gateway:latest
-    depends_on:
-      - mysql
-    volumes:
-      - ./core_system_config/gateway.properties:/gateway/application.properties
-      - ./certs/gateway.p12:/gateway/gateway.p12
-      - ./certs/gk_gw_truststore.p12:/gateway/truststore.p12
     ports:
       - 8453:8453
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-gateway-4.6.0/:/opt/arrowhead/
+      - ./certs/gateway.p12:/opt/arrowhead/certificates/gateway.p12
+      - ./certs/gk_gw_truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-gateway-4.6.0.jar
 
-#  eventhandler:
-#    container_name: eventhandler
-#    #restart: unless-stopped
-#    image: svetlint/eventhandler:latest
-#    depends_on:
-#      - mysql
-#    volumes:
-#      - ./core_system_config/eventhandler.properties:/eventhandler/application.properties
-#      - ./certs/event_handler.p12:/eventhandler/event_handler.p12
-#      - ./certs/truststore.p12:/eventhandler/truststore.p12
-#    ports:
-#      - 8455:8455
-
-#  certificateauthority:
-#    container_name: certificateauthority
-#    restart: unless-stopped
-#    image: svetlint/certificateauthority:latest
-#    depends_on:
-#      - mysql
-#    volumes:
-#      - ./core_system_config/certificateauthority.properties:/certificateauthority/application.properties
-#      - ./certs/certificate_authority.p12:/certificateauthority/certificate_authority.p12
-#      - ./certs/truststore.p12:/certificateauthority/truststore.p12
-#    ports:
-#      - 8448:8448
+  eventhandler:
+    container_name: eventhandler
+    ports:
+      - 8455:8455
+    image: openjdk:11-jre-slim
+    working_dir: /opt/arrowhead
+    volumes:
+      - ./services/arrowhead-eventhandler-4.6.0/:/opt/arrowhead/
+      - ./certs/eventhandler.p12:/opt/arrowhead/certificates/eventhandler.p12
+      - ./certs/truststore.p12:/opt/arrowhead/certificates/truststore.p12
+    command: java -jar arrowhead-eventhandler-4.6.0.jar
 
 volumes:
   mysql:
-    external: true
