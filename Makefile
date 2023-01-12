@@ -1,22 +1,27 @@
+-include .env
 COMPANY?=company
 CLOUD?=cloud
 RELAY?=relay
 COMMON_SAN?=dns:localhost,ip:127.0.0.1
 TIMEZONE?=Europe/Budapest
 
+all: down network secure sql debug
+
+clean: down clean-sql clean-certs
+
 sql:
 	chmod +x $(CURDIR)/scripts/initSQL.sh
 	$(CURDIR)/scripts/initSQL.sh
 
 clean-sql:
-	rm -r $(CURDIR)/sql/
+	rm -r $(CURDIR)/sql/ ||:
 
 certs:
 	chmod +x $(CURDIR)/scripts/create_p12_certs.sh
 	$(CURDIR)/scripts/create_p12_certs.sh $(COMPANY) $(CLOUD) $(RELAY) $(COMMON_SAN)
 
 clean-certs:
-	rm -r $(CURDIR)/certs/
+	rm -r $(CURDIR)/certs/ ||:
 
 secure: certs
 	for SERVICE in $(CURDIR)/services/arrowhead-*; do \
@@ -54,8 +59,6 @@ debug:
 
 low-memory:
 	docker compose up -XX:+UseSerialGC -Xmx1G -Xms32m
-
-all: down network secure sql up
 
 echo:
 	curl \
