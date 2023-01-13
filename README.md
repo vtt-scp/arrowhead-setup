@@ -7,181 +7,168 @@ This project is derived and expanded from scripts and docker-compose found in [A
 
 ## Table of Contents <!-- omit in toc -->
 - [Requirements](#requirements)
+- [Quickstart](#quickstart)
 - [Setup](#setup)
   - [Arrowhead services](#arrowhead-services)
     - [Getting Arrowhead service files](#getting-arrowhead-service-files)
-    - [Service file structure under `services` folder](#service-file-structure-under-services-folder)
+    - [Service file location and structure](#service-file-location-and-structure)
   - [Configuring `application.properties`](#configuring-applicationproperties)
-- [Running Arrowhead core systems with Docker](#running-arrowhead-core-systems-with-docker)
-  - [Requirements](#requirements-1)
-  - [Quick guide](#quick-guide)
-  - [Create certificates](#create-certificates)
-    - [Insert your information](#insert-your-information)
-    - [PKCS #12 password](#pkcs-12-password)
-    - [Run certificate generation script](#run-certificate-generation-script)
-  - [Start Arrowhead Core systems](#start-arrowhead-core-systems)
-    - [...with default options](#with-default-options)
-    - [...with docker images from jars](#with-docker-images-from-jars)
+    - [Container network](#container-network)
+    - [SSL certificates and configuration](#ssl-certificates-and-configuration)
+  - [SQL database initialization](#sql-database-initialization)
+- [Usage](#usage)
+  - [Start services](#start-services)
+  - [Stop services](#stop-services)
+  - [Access services](#access-services)
+  - [Test service availability](#test-service-availability)
+  - [Generate relay certificates](#generate-relay-certificates)
+- [Troubleshooting](#troubleshooting)
     - [...with lower memory usage (and less performance)](#with-lower-memory-usage-and-less-performance)
     - [...with management tool](#with-management-tool)
-    - [...with jars and low memory](#with-jars-and-low-memory)
     - [...with all above options](#with-all-above-options)
-  - [Shut down Arrowhead core systems](#shut-down-arrowhead-core-systems)
-- [P12 certificate unpacking for clients](#p12-certificate-unpacking-for-clients)
-  - [Shell script unpack\_p12.sh](#shell-script-unpack_p12sh)
-  - [Command line openssl unpack](#command-line-openssl-unpack)
+- [`.p12` certificate unpacking](#p12-certificate-unpacking)
 
 ## Requirements
 
 - Docker
 - Docker Compose
+- Arrowhead services version [`4.6.0`](https://github.com/eclipse-arrowhead/core-java-spring/releases/tag/4.6.0)
 
-Requires Docker, which can be installed for Ubuntu or Raspberry Pi following the guide [here](https://docs.docker.com/engine/install/ubuntu/).  
-For windows you need to download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
-
-You also need to separately install docker-compose on Linux systems to which instructions can be found [here](https://docs.docker.com/compose/install/)
-
-## Setup
-
-### Arrowhead services
-`services` directory for Arrowhead service files used to launch the services in containers with the `docker-compose.yml`.
-
-#### Getting Arrowhead service files
-- Latest released Arrowhead service files can be found in the [official releases](https://github.com/eclipse-arrowhead/core-java-spring/releases/).
-- Instuctions on how to build `.jar` files for Arrowhead services can be found in the [official](https://github.com/eclipse-arrowhead/core-java-spring) repository.
-
-#### Service file structure under `services` folder
-Each Arrowhead service under `services` folder should include `.jar` and `application.properties` files.  
-For example, `services/arrowhead-serviceregistry-4.6.0/` contains:
-- `application.properties`
-- `arrowhead-serviceregistry-4.6.0.jar`
-- `log4j2.xml`
-
-### Configuring `application.properties`
-
-
-
-
-## Running Arrowhead core systems with Docker
 Clone the repository to your machine with:
 ```
 git clone https://github.com/VTT-OM/arrowhead-setup.git
 ```
 
+## Quickstart
+To just run a test version of a secure Arrowhead cloud (Arrowhead service configuration, certificates, SQL database tables, start containers with logs in terminal). Drop the desired Arrowhead services under the `services` folder (unzipped, foldername: i.e. `arrowhead-<service>-4.6.0`). Then run the command:
+```
+make all
+```
+Booting up all services may take a couple of minutes. If this doesn't work, keep reading the following sections.
 
-### Requirements
-Requires Docker, which can be installed for Ubuntu or Raspberry Pi following the guide [here](https://docs.docker.com/engine/install/ubuntu/).  
-For windows you need to download and install [Docker Desktop](https://www.docker.com/products/docker-desktop).
+Clean up generated files with:
+```
+make clean
+```
 
-You also need to separately install docker-compose on Linux systems to which instructions can be found [here](https://docs.docker.com/compose/install/)
+## Setup
+Create and set desired settings and names as environment variables to a `.env` file. The default vaules can be seen in [Makefile](Makefile). The settings configurable in `.env` file: 
+```
+# Information for the Arrowhead cloud certificates (keep it simple)
+COMPANY=company
+CLOUD=cloud
+COMMON_SAN=dns:localhost,ip:127.0.0.1
+# Relay system certificate name and SAN
+RELAY_NAME=your_relay
+RELAY_SAN=dns:localhost,ip:127.0.0.1
+# Password for generated .p12 certificate/key stores
+PASSWORD=123456
 
+# Timezone used for Arrowhead service and MySQL database connection
+TIMEZONE=Europe/Budapest
 
-### Quick guide
-Generate default certificates (may need to run `dos2unix` / `unix2dos` on the script):
-```
-cd certs/scripts
-./create_p12_certs.sh
-```
-Create volume for database:
-```
-docker volume create --name=mysql
-```
-Start Arrowhead core systems (from repository root folder):
-```
-docker-compose up --build
-```
-Use `sysop` or `client` certificates found in `./certs` to access Arrowhead core systems.
+# MySQL root password. Default defined in docker-compose.yml.
+MYSQL_ROOT_PASSWORD=changethispassword
 
+# Develompent flag (Arrowhead services log to terminal)
+DEBUG=true
+```
+
+### Arrowhead services
+Arrowhead services are placed under the `services` directory to launch them containers with the `docker-compose.yml`.
+
+#### Getting Arrowhead service files
+- Latest released Arrowhead service files can be found in the [official releases](https://github.com/eclipse-arrowhead/core-java-spring/releases/).
+- If 
+- Instuctions on how to build `.jar` files for Arrowhead services can be found in the [official](https://github.com/eclipse-arrowhead/core-java-spring) repository.
+
+#### Service file location and structure
+Each Arrowhead service under `services` folder should include `.jar` and `application.properties` files. For example, `services/arrowhead-serviceregistry-4.6.0/` contains:
+- `application.properties`
+- `arrowhead-serviceregistry-4.6.0.jar`
+- `log4j2.xml`
+
+### Configuring `application.properties`
+Arrowhead service `application.properties` vary between services. This repository provides scripts to automatically configure the properties of services found in `services` folder.
+
+#### Container network
+The properties require network addresses to be updated for the services to find each other within the container network formed by the `docker-compose.yml`. This can be automatically configured to all services using the commands in [Makefile](Makefile).
+```
+make network
+```
+Depending on the Arrowhead services that are used, additional configuration is required to specific `application.properties` of services.
+
+#### SSL certificates and configuration
+To generate certificates and configure Arrowhead services to use secured communication:
+```
+make secure
+``` 
+
+### SQL database initialization
+Run following to download an organize SQL database files for MySQL service to use:
+```
+make sql
+```
+If you want to remake the certificates, delete the `certs` folder before calling the previous command:
+```
+make clean-sql
+```
+
+## Usage
+
+### Start services
+Start the Arrowhead services with:
+```
+make all
+```
+or
+```
+docker compose up
+```
+
+### Stop services
+Stop services with (`CTRL+C` if running attached) and with command:
+```
+make down
+```
+or
+```
+docker compose down
+```
+
+### Access services
+Use `sysop` certificates found in `./certs` to access secured Arrowhead core systems.
 
 Instructions on how to import the `sysop.p12` certificate to your browser can be found [here](https://www.ibm.com/support/knowledgecenter/SSYMRC_6.0.2/com.ibm.team.jp.jrs.doc/topics/t_jrs_brwsr_cert_cfg.html).  
-Default pasword for the `.p12` file is `123456`.
+Default pasword for the `.p12` file is `123456` (if unchanged in the `.env` settings).
 
-With browser you may now access Arrowhead core Swaggers from:
+With browser you may now access Arrowhead core Swagger ui from:
 ```
-https://localhost:8443  # Service registry
-https://localhost:8445  # Authorization
-https://localhost:8441  # Orchestrator
-https://localhost:8449  # Gatekeeper
-https://localhost:8453  # Gateway
-```
-
-
-### Create certificates
-Certificates are needed for HTTPS communication between the Arrowhead core and client systems.
-
-
-#### Insert your information
-Edit the script `./certs/scripts/create_p12_certs.sh` with your information to following fields:
-
-- COMPANY
-  - Your company name
-- CLOUD
-  - Your Arrowhead cloud name
-- COMMON_SAN
-  - Append here your dns and/or ip address of Arrowhead core systems host
-  - Append dns and/or ip addresses for your client systems
-- YOUR CLIENTS
-  - Append to the list of `create_consumer_system_keystore` your desired client system names
-
-Also remember to change Arrowhead core properties in `./core_system_config` folder to match:
-- `server.ssl.key-alias`
-
-
-#### PKCS #12 password
-You may set your own password to the P12 files before creating the certificates.  
-By default the password is `123456`.
-
-Edit the script `./certs/scripts/lib_certs.sh` with your desired default password for the .p12 certificate stores.
-
-Also remember to set the same password to Arrowhead core properties in `./core_system_config` folder:
-- `server.ssl.key-store-password`
-- `server.ssl.key-password`
-- `server.ssl.trust-store-password`
-
-
-#### Run certificate generation script
-Create the certificates for both Arrowhead core systems and clients by running the script found in directory:
-```
-cd ./certs/scripts
-```
-From there run command:
-```
-./create_p12_certs.sh
-```
-The script generates the certificates into a PKCS #12 (.p12) store within `./certs` folder. Incase the certificate already existed, it is not overwritten by the script.
-
-If you run into errors executing the script you may need to run `dos2unix` / `unix2dos` on the script depending on which OS you're using.
-
-
-### Start Arrowhead Core systems
-Ensure you have the necessary .p12 certificates and truststore for the core systems in `./certs` folder.
-
-Change `MYSQL_ROOT_PASSWORD` within `docker-compose.yml`.
-
-Once Docker is up and running you need to create a volume for the MariaDB database:
-```
-docker volume create --name=mysql
+https://localhost:8443/  # Service registry
+https://localhost:8445/  # Authorization
+https://localhost:8441/  # Orchestrator
+https://localhost:8449/  # Gatekeeper
+https://localhost:8453/  # Gateway
 ```
 
-#### ...with default options
-Run following command to start Arrowhead Core systems with existing docker images:
+### Test service availability
 ```
-docker-compose up --build
-```
-
-
-#### ...with docker images from jars
-Ensure `.jar` packages for core systems are located in `./jars` folder.
-Instuctions on how to build `.jar` files for Arrowhead core systems can be found in [core-java-spring](https://github.com/eclipse-arrowhead/core-java-spring) repository.
-
-```
-docker-compose \
--f docker-compose.yml \
--f docker-compose.jars.yml \
-up --build
+make echo
 ```
 
-You may need to use this option to get Arrowhead running on Raspberry Pi as existing docker images may not support RPi processor architecture.
+### Generate relay certificates
+You may generate system certificate for Arrowhead relay systems with:
+```
+make relay-certs
+```
+
+## Troubleshooting
+For Arrowhead related issues refer to the [official documentation](https://github.com/eclipse-arrowhead/core-java-spring).
+- If you run into errors executing the scripts (directly or via `make`) you may need to run `dos2unix` / `unix2dos` on the scripts depending on which OS you're using.
+- `make sql` may fail if the resources accessed in [initSQL.sh](scripts/initSQL.sh) are not available. Comment out missing table generation rules from the generated `sql/create_empty_arrowhead_db.sql` file.
+- Check that service names and external paths are correct in the `docker-compose.yml`.
+
+
 
 #### ...with lower memory usage (and less performance)
 Recommended when running for example on Raspberry Pi
@@ -202,15 +189,6 @@ docker-compose \
 up --build
 ```
 
-#### ...with jars and low memory
-```
-docker-compose \
--f docker-compose.yml \
--f docker-compose.jars.yml \
--f docker-compose.low_mem.yml \
-up --build
-```
-
 #### ...with all above options
 ```
 docker-compose \
@@ -221,36 +199,7 @@ docker-compose \
 up --build
 ```
 
-
-### Shut down Arrowhead core systems
-To stop running Arrowhead press `CTRL+C` to interrupt.  
-To clean up any remaining resources run:
-```
-docker-compose down
-```
-
-
-## P12 certificate unpacking for clients
-
-### Shell script unpack_p12.sh
-
-Utilizes openssl.  
-(May need to run `dos2unix` / `unix2dos` on the script)
-
-Using via command line:
-```
-script:                       path to p12 file:       passphrase:
-./certs/scripts/unpack_p12.sh ./certs/your_client.p12 123456
-```
-Output:
-```
-Created file: ./certs/your_client.crt
-Created file: ./certs/your_client.key
-Created file: ./certs/your_client.ca
-```
-
-
-### Command line openssl unpack
+## `.p12` certificate unpacking
 
 Certificate
 ```
@@ -264,6 +213,11 @@ CA Certificates
 ```
 openssl pkcs12 -in your_client.p12 -cacerts -nokeys -chain > your_client.ca
 ```
+Supply a password with option:
+```
+-passin pass:your_pass
+```
+
 Show SAN from .crt/.key/.ca:
 ```
 openssl x509 -text -noout -in your_client.pem | grep DNS
