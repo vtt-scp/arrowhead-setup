@@ -4,6 +4,7 @@
 # Edited by Jani Hietala (https://github.com/scurvide)
 
 source "./scripts/lib_certs.sh"
+export PASSWORD=$4
 
 # Running this script does not replace any existing certificates
 # Only creates new ones and adds them to truststore
@@ -13,10 +14,8 @@ ROOT="arrowhead.eu"
 COMPANY=$1
 # Your Arrowhead cloud
 CLOUD=$2
-# Relay
-RELAY=$3
 # Append Arrowhead cloud dns and/or ip address to COMMON_SAN
-COMMON_SAN=$4
+COMMON_SAN=$3
 
 
 # ROOT
@@ -38,22 +37,10 @@ create_cloud_keystore \
 
 # RELAY
 
-# Relay certificates for the relay system between Arrowhead local clouds
+# Relay certificates for signing relay systems between Arrowhead local clouds
 create_cloud_keystore \
   "./certs/master/master.p12" "${ROOT}" \
-  "./certs/relay/${RELAY}.p12" "${RELAY}.${ROOT}"
-
-create_relay_system_keystore() {
-  SYSTEM_NAME=$1
-  SAN="dns:${SYSTEM_NAME//_}"
-
-  create_system_keystore \
-    "./certs/master/master.p12" "${ROOT}" \
-    "./certs/relay/${RELAY}.p12" "${RELAY}.${ROOT}" \
-    "./certs/relay/${SYSTEM_NAME}.p12" "${SYSTEM_NAME}.${RELAY}.${ROOT}" \
-    "${SAN},${COMMON_SAN}"
-}
-create_relay_system_keystore "your_relay"
+  "./certs/relay/relay.p12" "relay.${ROOT}"
 
 create_truststore \
   "./certs/relay/truststore.p12" \
@@ -103,4 +90,4 @@ create_truststore \
 create_truststore \
   "./certs/gk_gw_truststore.p12" \
   "./certs/cloud/${CLOUD}.crt" "${CLOUD}.${COMPANY}.${ROOT}" \
-  "./certs/relay/${RELAY}.crt" "${RELAY}.${ROOT}"
+  "./certs/relay/relay.crt" "relay.${ROOT}"
