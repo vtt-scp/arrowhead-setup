@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     image: mysql:8
     environment:
-      MYSQL_ROOT_PASSWORD: changethispass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changethispassword}
     volumes:
       - mysql:/var/lib/mysql
       - ./sql/:/docker-entrypoint-initdb.d/
