@@ -1,9 +1,18 @@
 # arrowhead-setup <!-- omit in toc -->
 This project is derived and expanded from scripts and docker-compose found in [Arrowhead framework core project](https://github.com/eclipse-arrowhead/core-java-spring).
 
-- Setup Arrowhead Framework core systems utilizing Docker and Docker-compose.
-- Create PKCS #12 certificates and unpack them for clients.
+- Setup Arrowhead core services utilizing containers and `docker-compose.yml`
+- Generate certificates for secured Arrowhead communication
+- `Makefile` for quick configuration of the container network and certificates for Arrowhead services
 
+Arrowhead services included (more can be easily added):
+- Service registry
+- Authorization
+- Orchestrator
+- Certificate authority
+- Gatekeeper
+- Gateway
+- Eventhandler
 
 ## Table of Contents <!-- omit in toc -->
 - [Requirements](#requirements)
@@ -16,16 +25,16 @@ This project is derived and expanded from scripts and docker-compose found in [A
     - [Container network](#container-network)
     - [SSL certificates and configuration](#ssl-certificates-and-configuration)
   - [SQL database initialization](#sql-database-initialization)
+  - [Lower memory consumption](#lower-memory-consumption)
+  - [Additional Arrowhead services](#additional-arrowhead-services)
 - [Usage](#usage)
   - [Start services](#start-services)
   - [Stop services](#stop-services)
   - [Access services](#access-services)
   - [Test service availability](#test-service-availability)
   - [Generate relay certificates](#generate-relay-certificates)
+- [Clean-up](#clean-up)
 - [Troubleshooting](#troubleshooting)
-    - [...with lower memory usage (and less performance)](#with-lower-memory-usage-and-less-performance)
-    - [...with management tool](#with-management-tool)
-    - [...with all above options](#with-all-above-options)
 - [`.p12` certificate unpacking](#p12-certificate-unpacking)
 
 ## Requirements
@@ -34,17 +43,12 @@ This project is derived and expanded from scripts and docker-compose found in [A
 - Docker Compose
 - Arrowhead services version [`4.6.0`](https://github.com/eclipse-arrowhead/core-java-spring/releases/tag/4.6.0)
 
-Clone the repository to your machine with:
-```
-git clone https://github.com/VTT-OM/arrowhead-setup.git
-```
-
 ## Quickstart
 To just run a test version of a secure Arrowhead cloud (Arrowhead service configuration, certificates, SQL database tables, start containers with logs in terminal). Drop the desired Arrowhead services under the `services` folder (unzipped, foldername: i.e. `arrowhead-<service>-4.6.0`). Then run the command:
 ```
 make all
 ```
-Booting up all services may take a couple of minutes. If this doesn't work, keep reading the following sections.
+Booting up all services may take a couple of minutes. If this doesn't work, keep reading the following sections. Arrowhead services may throw multiple errors on first boot as MySQL server is not ready yet with initializing the database.
 
 Clean up generated files with:
 ```
@@ -52,7 +56,7 @@ make clean
 ```
 
 ## Setup
-Create and set desired settings and names as environment variables to a `.env` file. The default vaules can be seen in [Makefile](Makefile). The settings configurable in `.env` file: 
+Create and set desired settings and names as environment variables to a `.env` file at project root. The default vaules can be seen in [Makefile](Makefile). The settings configurable in `.env` file: 
 ```
 # Information for the Arrowhead cloud certificates (keep it simple)
 COMPANY=company
@@ -70,7 +74,7 @@ TIMEZONE=Europe/Budapest
 # MySQL root password. Default defined in docker-compose.yml.
 MYSQL_ROOT_PASSWORD=changethispassword
 
-# Develompent flag (Arrowhead services log to terminal)
+# Debug flag (Arrowhead services log to terminal)
 DEBUG=true
 ```
 
@@ -102,17 +106,39 @@ Depending on the Arrowhead services that are used, additional configuration is r
 To generate certificates and configure Arrowhead services to use secured communication:
 ```
 make secure
-``` 
+```
+If you want to remake the certificates, delete the `certs` folder before calling the previous command:
+```
+make clean-certs
+```
 
 ### SQL database initialization
 Run following to download an organize SQL database files for MySQL service to use:
 ```
 make sql
 ```
-If you want to remake the certificates, delete the `certs` folder before calling the previous command:
+
+### Lower memory consumption
+Arrowhead services can be made to consume less memory at the cost of performance by changing the startup command in `arrowhead-common.yml`:
 ```
-make clean-sql
+command: java -jar app.jar
 ```
+to
+```
+command: java -XX:+UseSerialGC -Xmx1G -Xms32m -jar app.jar
+```
+
+### Additional Arrowhead services
+More services can be added by configuring the following appropriately:
+- `docker-compose.yaml`
+  - Add service container configuration
+- `scripts/create_p12.certs.sh`
+  - Add certificate generation call to the list with other services:  
+  `create_consumer_system_keystore "arrowheadservicename"`
+- Get SQL privilege scripts for the services from the [official repository](https://github.com/eclipse-arrowhead/core-java-spring/tree/master/scripts)
+  - Add privileges to `sql/privileges` folder
+  - Update `sql/create_empty_arrowhead_db.sql` accordingly
+    - Check that the service `application.properties` username and password match the SQL file
 
 ## Usage
 
@@ -147,8 +173,10 @@ With browser you may now access Arrowhead core Swagger ui from:
 https://localhost:8443/  # Service registry
 https://localhost:8445/  # Authorization
 https://localhost:8441/  # Orchestrator
+https://localhost:8448/  # Certificate authority
 https://localhost:8449/  # Gatekeeper
 https://localhost:8453/  # Gateway
+https://localhost:8455/  # Event handler
 ```
 
 ### Test service availability
@@ -162,6 +190,12 @@ You may generate system certificate for Arrowhead relay systems with:
 make relay-certs
 ```
 
+## Clean-up
+To completely remove all genearted certificates, SQL commands, downloaded container images, and created volumes:
+```
+make clean
+```
+
 ## Troubleshooting
 For Arrowhead related issues refer to the [official documentation](https://github.com/eclipse-arrowhead/core-java-spring).
 - If you run into errors executing the scripts (directly or via `make`) you may need to run `dos2unix` / `unix2dos` on the scripts depending on which OS you're using.
@@ -169,37 +203,8 @@ For Arrowhead related issues refer to the [official documentation](https://githu
 - Check that service names and external paths are correct in the `docker-compose.yml`.
 
 
-
-#### ...with lower memory usage (and less performance)
-Recommended when running for example on Raspberry Pi
-
-```
-docker-compose \
--f docker-compose.yml \
--f docker-compose.low_mem.yml \
-up --build
-```
-
-
-#### ...with management tool
-```
-docker-compose \
--f docker-compose.yml \
--f docker-compose.mgmt_tool.yml \
-up --build
-```
-
-#### ...with all above options
-```
-docker-compose \
--f docker-compose.yml \
--f docker-compose.jars.yml \
--f docker-compose.low_mem.yml \
--f docker-compose.mgmt_tool.yml \
-up --build
-```
-
 ## `.p12` certificate unpacking
+Commands below may be helpful, not normally needed.
 
 Certificate
 ```

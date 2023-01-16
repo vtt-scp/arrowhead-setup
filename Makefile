@@ -13,19 +13,15 @@ all: down network secure sql
 		docker compose up; \
 	else \
 		docker compose up -d; \
-    fi
+	fi
 
 down:
 	docker compose down
 
-clean: down clean-sql clean-certs
+clean: clean-docker clean-certs
 
-sql:
-	chmod +x $(CURDIR)/scripts/initSQL.sh
-	$(CURDIR)/scripts/initSQL.sh
-
-clean-sql:
-	rm -r $(CURDIR)/sql/ ||:
+clean-docker:
+	docker compose down -v --rmi all
 
 certs:
 	chmod +x $(CURDIR)/scripts/create_p12_certs.sh
