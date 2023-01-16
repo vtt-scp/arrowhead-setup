@@ -1,6 +1,0 @@
-!includedir /etc/mysql/conf.d/ 
-!includedir /etc/mysql/mysql.conf.d/ 
-# Default max_connections was 151 which resulted
-# in too many connections error when booting AHF
-[mysqld] 
-max_connections=200

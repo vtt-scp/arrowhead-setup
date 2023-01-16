@@ -1,0 +1,10 @@
+services:
+  arrowhead-service:
+    image: openjdk:11-jre-slim
+    depends_on:
+      mysql:
+        condition: service_healthy
+    working_dir: /opt/arrowhead
+    command: java -jar app.jar
+    # Lowers memory usage of the services, but also lowers performance.
+    #command: java -XX:+UseSerialGC -Xmx1G -Xms32m -jar app.jar
